@@ -6,61 +6,38 @@
     <title>Prime - Daily Discipline</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <meta name="theme-color" content="#7C3AED">
+    <meta name="theme-color" content="#f59e0b">
 </head>
 <body>
-    <header>
+    <header class="header">
         <h1>PRIME</h1>
-        <div class="date" id="currentDate"></div>
+        <p class="quote" id="quote">Loading motivation...</p>
     </header>
 
-    <!-- HABIT TRACKER SECTION -->
-    <div class="section-title">🔥 Today's Habits</div>
-    <div class="habit-list" id="habitList"></div>
+    <main>
+        <section class="habits">
+            <h2>Today's Habits</h2>
+            <div class="habit-grid" id="habitGrid"></div>
+        </section>
 
-    <!-- MOTIVATION QUOTE -->
-    <div class="quote-card" id="quoteCard">
-        <div class="quote-text" id="quoteText">"The only bad workout is the one that didn't happen."</div>
-        <div class="quote-author" id="quoteAuthor">– Unknown</div>
-    </div>
+        <section class="focus">
+            <h2>Focus Session</h2>
+            <div class="timer-circle" id="timerCircle">
+                <span id="timer">25:00</span>
+            </div>
+            <div class="timer-controls">
+                <button id="startTimer" class="btn-primary">Start</button>
+                <button id="pauseTimer" class="btn-primary">Pause</button>
+                <button id="resetTimer" class="btn-primary">Reset</button>
+            </div>
+        </section>
 
-    <!-- FOCUS TIMER -->
-    <div class="section-title">⏱️ Focus Timer</div>
-    <div class="timer-section">
-        <div class="timer-display" id="timer">25:00</div>
-        <div class="timer-controls">
-            <button class="btn" id="startTimer">Start</button>
-            <button class="btn btn-secondary" id="pauseTimer">Pause</button>
-            <button class="btn btn-danger" id="resetTimer">Reset</button>
-        </div>
-    </div>
+        <button id="feeling-down" class="btn-primary">Feeling down? 💙</button>
+    </main>
 
-    <!-- QUICK MOTIVATION BUTTON -->
-    <button class="btn motivation-btn" id="motivationBtn">
-        <i class="fas fa-bolt"></i> Need Motivation?
-    </button>
-
-    <!-- AD SPACE -->
-    <div class="ad-banner" id="adSpace">
-        📢 Your ad could be here – support Prime!
-    </div>
-
-    <!-- BOTTOM NAVIGATION -->
-    <nav>
-        <a href="#" class="nav-item active" data-section="home">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-        </a>
-        <a href="#" class="nav-item" data-section="stats">
-            <i class="fas fa-chart-line"></i>
-            <span>Stats</span>
-        </a>
-        <a href="#" class="nav-item" data-section="settings">
-            <i class="fas fa-cog"></i>
-            <span>Settings</span>
-        </a>
-    </nav>
+    <footer>
+        <small>Streak 🔥 powered by discipline</small>
+    </footer>
 
     <script>
         // ========== APP STATE ==========
@@ -71,65 +48,52 @@
         ];
 
         let timerInterval = null;
-        let timerSeconds = 25 * 60; // 25 minutes
+        let timerSeconds = 25 * 60;
         let timerRunning = false;
-        let currentSection = 'home';
 
         const quotes = [
-            { text: "Discipline is choosing what you want now for what you want most.", author: "Unknown" },
-            { text: "You don't have to be extreme, just consistent.", author: "James Clear" },
-            { text: "Small disciplines repeated daily lead to great achievements.", author: "John Maxwell" },
-            { text: "The pain of discipline weighs ounces; regret weighs tons.", author: "Jim Rohn" },
-            { text: "Motivation gets you started. Discipline keeps you going.", author: "Unknown" }
+            "Discipline is choosing between what you want now and what you want most.",
+            "Small disciplines repeated daily lead to great achievements.",
+            "The pain of discipline weighs ounces; regret weighs tons.",
+            "You don't have to be extreme, just consistent.",
+            "Motivation gets you started. Discipline keeps you going."
         ];
 
-        // ========== INITIALIZE ==========
+        // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
-            updateDate();
             loadSavedData();
             renderHabits();
             updateTimerDisplay();
             setDailyQuote();
             setupEventListeners();
             
-            // Register service worker
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js')
-                    .catch(err => console.log('SW error:', err));
+                navigator.serviceWorker.register('service-worker.js');
             }
         });
 
-        function updateDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = 
-                new Date().toLocaleDateString('en-US', options);
-        }
-
         function loadSavedData() {
             const saved = localStorage.getItem('primeHabits');
-            if (saved) {
-                habits = JSON.parse(saved);
-            }
+            if (saved) habits = JSON.parse(saved);
         }
 
         function saveData() {
             localStorage.setItem('primeHabits', JSON.stringify(habits));
         }
 
-        // ========== HABIT TRACKER ==========
+        // ========== HABITS ==========
         function renderHabits() {
-            const habitList = document.getElementById('habitList');
-            habitList.innerHTML = habits.map((habit, index) => `
-                <div class="habit-item">
-                    <label style="display: flex; align-items: center; gap: 12px;">
-                        <input type="checkbox" class="habit-check" 
-                            ${habit.completed ? 'checked' : ''} 
-                            onchange="toggleHabit(${index})">
-                        <span style="${habit.completed ? 'opacity: 0.6; text-decoration: line-through;' : ''}">
-                            ${habit.name}
-                        </span>
-                    </label>
-                    <span class="streak">${habit.streak}</span>
+            const grid = document.getElementById('habitGrid');
+            grid.innerHTML = habits.map((habit, index) => `
+                <div class="habit-card">
+                    <span class="habit-name">${habit.name}</span>
+                    <div class="streak ${habit.streak > 0 ? 'fire' : ''}">
+                        ${habit.streak}
+                    </div>
+                    <button class="check-btn ${habit.completed ? 'completed' : ''}" 
+                            onclick="toggleHabit(${index})">
+                        ✓
+                    </button>
                 </div>
             `).join('');
         }
@@ -139,6 +103,11 @@
             
             if (habits[index].completed) {
                 habits[index].streak += 1;
+                // Optional confetti effect
+                document.querySelectorAll('.habit-card')[index].style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    document.querySelectorAll('.habit-card')[index].style.transform = 'scale(1)';
+                }, 200);
             } else {
                 habits[index].streak = Math.max(0, habits[index].streak - 1);
             }
@@ -153,82 +122,64 @@
             const secs = timerSeconds % 60;
             document.getElementById('timer').textContent = 
                 `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            // Update circle progress
+            const progress = ((25*60 - timerSeconds) / (25*60)) * 360;
+            document.getElementById('timerCircle').style.background = 
+                `conic-gradient(var(--accent) ${progress}deg, var(--gray) ${progress}deg)`;
         }
 
-        function startTimer() {
+        document.getElementById('startTimer').addEventListener('click', () => {
             if (timerRunning) return;
             timerRunning = true;
-            
             timerInterval = setInterval(() => {
                 if (timerSeconds > 0) {
                     timerSeconds--;
                     updateTimerDisplay();
                 } else {
-                    // Timer finished
                     clearInterval(timerInterval);
                     timerRunning = false;
                     alert("✅ Time's up! Great work.");
-                    // Optional: play sound or notification
                 }
             }, 1000);
-        }
+        });
 
-        function pauseTimer() {
+        document.getElementById('pauseTimer').addEventListener('click', () => {
             clearInterval(timerInterval);
             timerRunning = false;
-        }
+        });
 
-        function resetTimer() {
-            pauseTimer();
+        document.getElementById('resetTimer').addEventListener('click', () => {
+            clearInterval(timerInterval);
+            timerRunning = false;
             timerSeconds = 25 * 60;
             updateTimerDisplay();
-        }
-
-        document.getElementById('startTimer').addEventListener('click', startTimer);
-        document.getElementById('pauseTimer').addEventListener('click', pauseTimer);
-        document.getElementById('resetTimer').addEventListener('click', resetTimer);
+        });
 
         // ========== MOTIVATION ==========
         function setDailyQuote() {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quoteText').textContent = `"${quotes[randomIndex].text}"`;
-            document.getElementById('quoteAuthor').textContent = `– ${quotes[randomIndex].author}`;
+            const random = Math.floor(Math.random() * quotes.length);
+            document.getElementById('quote').textContent = `"${quotes[random]}"`;
         }
 
-        document.getElementById('motivationBtn').addEventListener('click', () => {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quoteText').textContent = `"${quotes[randomIndex].text}"`;
-            document.getElementById('quoteAuthor').textContent = `– ${quotes[randomIndex].author}`;
+        document.getElementById('feeling-down').addEventListener('click', () => {
+            const random = Math.floor(Math.random() * quotes.length);
+            document.getElementById('quote').textContent = `"${quotes[random]}"`;
             
-            // Add micro-interaction
-            const btn = document.getElementById('motivationBtn');
+            // Micro-interaction
+            const btn = document.getElementById('feeling-down');
             btn.style.transform = 'scale(0.95)';
             setTimeout(() => btn.style.transform = 'scale(1)', 200);
         });
 
-        // ========== NAVIGATION ==========
+        // ========== MICRO-INTERACTIONS ==========
         function setupEventListeners() {
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    // Update active class
-                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                    item.classList.add('active');
-                    
-                    // Here you'd handle showing different sections
-                    // For V1, we'll just log
-                    console.log('Navigate to:', item.dataset.section);
-                });
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.addEventListener('mousedown', () => btn.style.transform = 'scale(0.95)');
+                btn.addEventListener('mouseup', () => btn.style.transform = 'scale(1)');
+                btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
             });
         }
-
-        // ========== MICRO-INTERACTIONS ==========
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('mousedown', () => btn.style.transform = 'scale(0.95)');
-            btn.addEventListener('mouseup', () => btn.style.transform = 'scale(1)');
-            btn.addEventListener('mouseleave', () => btn.style.transform = 'scale(1)');
-        });
     </script>
 </body>
 </html>
