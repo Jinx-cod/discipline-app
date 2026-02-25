@@ -14,6 +14,15 @@
         <p class="quote" id="quote">Loading motivation...</p>
     </header>
 
+    <!-- USER SECTION (LOGIN/LOGOUT) -->
+    <div id="userSection" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 1rem;">
+        <div id="userInfo">
+            <span id="userName">Guest</span>
+        </div>
+        <button id="loginBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem;">Sign in with Google</button>
+        <button id="logoutBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem; display: none;">Logout</button>
+    </div>
+
     <main>
         <section class="habits">
             <h2>Today's Habits</h2>
@@ -39,6 +48,43 @@
         <small>Streak 🔥 powered by discipline</small>
     </footer>
 
+    <!-- ===== SCRIPT 1: FIREBASE INIT ===== -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSc0D-K1Ciw9V4bGEKNPSpQZ1pOFkYUMU",
+            authDomain: "prime-app-516e1.firebaseapp.com",
+            projectId: "prime-app-516e1",
+            storageBucket: "prime-app-516e1.firebasestorage.app",
+            messagingSenderId: "451478170334",
+            appId: "1:451478170334:web:1aa1099ea3ab9c4facb04f"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Make available globally
+        window.auth = auth;
+        window.db = db;
+        window.provider = provider;
+        window.signInWithPopup = signInWithPopup;
+        window.signOut = signOut;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+
+        console.log("🔥 Firebase ready");
+    </script>
+
+    <!-- ===== SCRIPT 2: APP LOGIC (Habits, Timer, etc) ===== -->
     <script>
         // ========== APP STATE ==========
         let habits = [
@@ -50,6 +96,7 @@
         let timerInterval = null;
         let timerSeconds = 25 * 60;
         let timerRunning = false;
+        let currentUser = null;
 
         const quotes = [
             "Discipline is choosing between what you want now and what you want most.",
@@ -66,6 +113,7 @@
             updateTimerDisplay();
             setDailyQuote();
             setupEventListeners();
+            setupFirebaseListeners();
             
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('service-worker.js');
@@ -79,11 +127,80 @@
 
         function saveData() {
             localStorage.setItem('primeHabits', JSON.stringify(habits));
+            // If logged in, also save to cloud
+            if (currentUser) {
+                saveToCloud();
+            }
+        }
+
+        // ========== FIREBASE AUTH ==========
+        function setupFirebaseListeners() {
+            // Login button
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                try {
+                    const result = await window.signInWithPopup(window.auth, window.provider);
+                    currentUser = result.user;
+                    document.getElementById('userName').textContent = currentUser.displayName || 'User';
+                    document.getElementById('loginBtn').style.display = 'none';
+                    document.getElementById('logoutBtn').style.display = 'block';
+                    
+                    // Load user's cloud data
+                    await loadFromCloud();
+                    renderHabits();
+                } catch (error) {
+                    console.error('Login error:', error);
+                }
+            });
+
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                await window.signOut(window.auth);
+                currentUser = null;
+                document.getElementById('userName').textContent = 'Guest';
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'none';
+                
+                // Reload local data
+                loadSavedData();
+                renderHabits();
+            });
+        }
+
+        // ========== CLOUD SYNC ==========
+        async function saveToCloud() {
+            if (!currentUser) return;
+            
+            const userDoc = window.doc(window.db, 'users', currentUser.uid);
+            await window.setDoc(userDoc, {
+                habits: habits,
+                lastActive: new Date().toISOString(),
+                email: currentUser.email
+            }, { merge: true });
+            
+            console.log('Saved to cloud');
+        }
+
+        async function loadFromCloud() {
+            if (!currentUser) return;
+            
+            const userDoc = window.doc(window.db, 'users', currentUser.uid);
+            const docSnap = await window.getDoc(userDoc);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.habits) {
+                    habits = data.habits;
+                    saveData(); // Update local storage
+                }
+                console.log('Loaded from cloud');
+            }
         }
 
         // ========== HABITS ==========
         function renderHabits() {
             const grid = document.getElementById('habitGrid');
+            if (!grid) return;
+            
             grid.innerHTML = habits.map((habit, index) => `
                 <div class="habit-card">
                     <span class="habit-name">${habit.name}</span>
@@ -103,11 +220,13 @@
             
             if (habits[index].completed) {
                 habits[index].streak += 1;
-                // Optional confetti effect
-                document.querySelectorAll('.habit-card')[index].style.transform = 'scale(1.05)';
-                setTimeout(() => {
-                    document.querySelectorAll('.habit-card')[index].style.transform = 'scale(1)';
-                }, 200);
+                const cards = document.querySelectorAll('.habit-card');
+                if (cards[index]) {
+                    cards[index].style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        cards[index].style.transform = 'scale(1)';
+                    }, 200);
+                }
             } else {
                 habits[index].streak = Math.max(0, habits[index].streak - 1);
             }
@@ -118,18 +237,21 @@
 
         // ========== TIMER ==========
         function updateTimerDisplay() {
+            const timerEl = document.getElementById('timer');
+            if (!timerEl) return;
+            
             const mins = Math.floor(timerSeconds / 60);
             const secs = timerSeconds % 60;
-            document.getElementById('timer').textContent = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             
-            // Update circle progress
-            const progress = ((25*60 - timerSeconds) / (25*60)) * 360;
-            document.getElementById('timerCircle').style.background = 
-                `conic-gradient(var(--accent) ${progress}deg, var(--gray) ${progress}deg)`;
+            const circle = document.getElementById('timerCircle');
+            if (circle) {
+                const progress = ((25*60 - timerSeconds) / (25*60)) * 360;
+                circle.style.background = `conic-gradient(var(--accent) ${progress}deg, var(--gray) ${progress}deg)`;
+            }
         }
 
-        document.getElementById('startTimer').addEventListener('click', () => {
+        document.getElementById('startTimer')?.addEventListener('click', () => {
             if (timerRunning) return;
             timerRunning = true;
             timerInterval = setInterval(() => {
@@ -144,12 +266,12 @@
             }, 1000);
         });
 
-        document.getElementById('pauseTimer').addEventListener('click', () => {
+        document.getElementById('pauseTimer')?.addEventListener('click', () => {
             clearInterval(timerInterval);
             timerRunning = false;
         });
 
-        document.getElementById('resetTimer').addEventListener('click', () => {
+        document.getElementById('resetTimer')?.addEventListener('click', () => {
             clearInterval(timerInterval);
             timerRunning = false;
             timerSeconds = 25 * 60;
@@ -158,18 +280,25 @@
 
         // ========== MOTIVATION ==========
         function setDailyQuote() {
+            const quoteEl = document.getElementById('quote');
+            if (!quoteEl) return;
+            
             const random = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quote').textContent = `"${quotes[random]}"`;
+            quoteEl.textContent = `"${quotes[random]}"`;
         }
 
-        document.getElementById('feeling-down').addEventListener('click', () => {
+        document.getElementById('feeling-down')?.addEventListener('click', () => {
             const random = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quote').textContent = `"${quotes[random]}"`;
+            const quoteEl = document.getElementById('quote');
+            if (quoteEl) {
+                quoteEl.textContent = `"${quotes[random]}"`;
+            }
             
-            // Micro-interaction
             const btn = document.getElementById('feeling-down');
-            btn.style.transform = 'scale(0.95)';
-            setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            if (btn) {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            }
         });
 
         // ========== MICRO-INTERACTIONS ==========
