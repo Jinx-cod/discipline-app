@@ -1,0 +1,21 @@
+{
+  "name": "Prime: Daily Discipline",
+  "short_name": "Prime",
+  "description": "Habit tracker, focus timer & daily motivation",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0A0F1C",
+  "theme_color": "#7C3AED",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/7C3AED/FFFFFF?text=P",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/7C3AED/FFFFFF?text=P",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
