@@ -3,59 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prime - Daily Discipline</title>
+    <title>GANADOR — Build. Grind. Win.</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f59e0b">
+    <meta name="theme-color" content="#FF6B00">
+    <style>
+        /* SPLASH SCREEN STYLES */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .splash-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ganador-bg-text {
+            position: absolute;
+            font-size: 8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: rgba(255, 107, 0, 0.15);
+            text-shadow: 0 0 30px rgba(255, 107, 0, 0.2);
+            letter-spacing: 0.2em;
+            z-index: 1;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .runner {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            z-index: 2;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.6));
+        }
+
+        .runner-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .head {
+            position: absolute;
+            top: 30px;
+            left: 70px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .torso {
+            position: absolute;
+            top: 60px;
+            left: 77px;
+            width: 16px;
+            height: 60px;
+            background: linear-gradient(180deg, #00ffff, #0066ff);
+            transform: rotate(15deg);
+            border-radius: 8px;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .arm-back {
+            position: absolute;
+            top: 65px;
+            left: 85px;
+            width: 12px;
+            height: 50px;
+            background: linear-gradient(180deg, #00ffff, #0066ff);
+            transform: rotate(-45deg);
+            border-radius: 6px;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .arm-front {
+            position: absolute;
+            top: 65px;
+            left: 65px;
+            width: 12px;
+            height: 50px;
+            background: linear-gradient(180deg, #00ffff, #0066ff);
+            transform: rotate(70deg);
+            border-radius: 6px;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .leg-back {
+            position: absolute;
+            top: 115px;
+            left: 80px;
+            width: 14px;
+            height: 55px;
+            background: linear-gradient(180deg, #0066ff, #0044aa);
+            transform: rotate(-30deg);
+            border-radius: 7px;
+            box-shadow: 0 0 15px #0066ff;
+        }
+
+        .leg-front {
+            position: absolute;
+            top: 115px;
+            left: 70px;
+            width: 14px;
+            height: 55px;
+            background: linear-gradient(180deg, #0066ff, #0044aa);
+            transform: rotate(35deg);
+            border-radius: 7px;
+            box-shadow: 0 0 15px #0066ff;
+        }
+
+        .splash-tagline {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+
+        .main-content {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <header class="header">
-        <h1>PRIME</h1>
-        <p class="quote" id="quote">Loading motivation...</p>
-    </header>
-
-    <!-- USER SECTION (LOGIN/LOGOUT) -->
-    <div id="userSection" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 1rem;">
-        <div id="userInfo">
-            <span id="userName">Guest</span>
+    <!-- SPLASH SCREEN -->
+    <div class="splash-screen" id="splash">
+        <div class="ganador-bg-text">GANADOR</div>
+        <div class="runner">
+            <div class="runner-body">
+                <div class="head"></div>
+                <div class="torso"></div>
+                <div class="arm-back"></div>
+                <div class="arm-front"></div>
+                <div class="leg-back"></div>
+                <div class="leg-front"></div>
+            </div>
         </div>
-        <button id="loginBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem;">Sign in with Google</button>
-        <button id="logoutBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem; display: none;">Logout</button>
+        <div class="splash-tagline">Build. Grind. Win.</div>
     </div>
 
-    <main>
-        <section class="habits">
-            <h2>Today's Habits</h2>
-            <div class="habit-grid" id="habitGrid"></div>
-        </section>
+    <!-- MAIN APP CONTENT (HIDDEN UNTIL SPLASH ENDS) -->
+    <div class="main-content" id="mainContent">
+        <header class="header">
+            <h1>GANADOR</h1>
+            <p class="quote" id="quote">Loading motivation...</p>
+        </header>
 
-        <section class="focus">
-            <h2>Focus Session</h2>
-            <div class="timer-circle" id="timerCircle">
-                <span id="timer">25:00</span>
+        <!-- USER SECTION (LOGIN/LOGOUT) -->
+        <div id="userSection" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 1rem;">
+            <div id="userInfo">
+                <span id="userName">Guest</span>
             </div>
-            <div class="timer-controls">
-                <button id="startTimer" class="btn-primary">Start</button>
-                <button id="pauseTimer" class="btn-primary">Pause</button>
-                <button id="resetTimer" class="btn-primary">Reset</button>
-            </div>
-        </section>
+            <button id="loginBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem;">Sign in with Google</button>
+            <button id="logoutBtn" class="btn-primary" style="width: auto; margin: 0; padding: 0.5rem 1rem; display: none;">Logout</button>
+        </div>
 
-        <button id="feeling-down" class="btn-primary">Feeling down? 💙</button>
-    </main>
+        <main>
+            <section class="habits">
+                <h2>Today's Habits</h2>
+                <div class="habit-grid" id="habitGrid"></div>
+            </section>
 
-    <footer>
-        <small>Streak 🔥 powered by discipline</small>
-    </footer>
+            <section class="focus">
+                <h2>Focus Session</h2>
+                <div class="timer-circle" id="timerCircle">
+                    <span id="timer">25:00</span>
+                </div>
+                <div class="timer-controls">
+                    <button id="startTimer" class="btn-primary">Start</button>
+                    <button id="pauseTimer" class="btn-primary">Pause</button>
+                    <button id="resetTimer" class="btn-primary">Reset</button>
+                </div>
+            </section>
 
-    <!-- ===== SCRIPT 1: FIREBASE INIT ===== -->
+            <button id="feeling-down" class="btn-primary">Feeling down? 💙</button>
+        </main>
+
+        <footer>
+            <small>Streak 🔥 powered by discipline</small>
+        </footer>
+    </div>
+
+    <!-- FIREBASE SCRIPT -->
     <script type="module">
-        // Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyBSc0D-K1Ciw9V4bGEKNPSpQZ1pOFkYUMU",
             authDomain: "prime-app-516e1.firebaseapp.com",
@@ -65,13 +216,11 @@
             appId: "1:451478170334:web:1aa1099ea3ab9c4facb04f"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // Make available globally
         window.auth = auth;
         window.db = db;
         window.provider = provider;
@@ -80,12 +229,16 @@
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
-
-        console.log("🔥 Firebase ready");
     </script>
 
-    <!-- ===== SCRIPT 2: APP LOGIC (Habits, Timer, etc) ===== -->
+    <!-- APP LOGIC SCRIPT -->
     <script>
+        // Hide splash screen after 2 seconds
+        setTimeout(() => {
+            document.getElementById('splash').classList.add('splash-hidden');
+            document.getElementById('mainContent').style.display = 'block';
+        }, 2000);
+
         // ========== APP STATE ==========
         let habits = [
             { name: "Morning Workout", completed: false, streak: 0 },
@@ -106,7 +259,6 @@
             "Motivation gets you started. Discipline keeps you going."
         ];
 
-        // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
             loadSavedData();
             renderHabits();
@@ -121,13 +273,12 @@
         });
 
         function loadSavedData() {
-            const saved = localStorage.getItem('primeHabits');
+            const saved = localStorage.getItem('ganadorHabits');
             if (saved) habits = JSON.parse(saved);
         }
 
         function saveData() {
-            localStorage.setItem('primeHabits', JSON.stringify(habits));
-            // If logged in, also save to cloud
+            localStorage.setItem('ganadorHabits', JSON.stringify(habits));
             if (currentUser) {
                 saveToCloud();
             }
@@ -135,7 +286,6 @@
 
         // ========== FIREBASE AUTH ==========
         function setupFirebaseListeners() {
-            // Login button
             document.getElementById('loginBtn').addEventListener('click', async () => {
                 try {
                     const result = await window.signInWithPopup(window.auth, window.provider);
@@ -143,8 +293,6 @@
                     document.getElementById('userName').textContent = currentUser.displayName || 'User';
                     document.getElementById('loginBtn').style.display = 'none';
                     document.getElementById('logoutBtn').style.display = 'block';
-                    
-                    // Load user's cloud data
                     await loadFromCloud();
                     renderHabits();
                 } catch (error) {
@@ -152,51 +300,40 @@
                 }
             });
 
-            // Logout button
             document.getElementById('logoutBtn').addEventListener('click', async () => {
                 await window.signOut(window.auth);
                 currentUser = null;
                 document.getElementById('userName').textContent = 'Guest';
                 document.getElementById('loginBtn').style.display = 'block';
                 document.getElementById('logoutBtn').style.display = 'none';
-                
-                // Reload local data
                 loadSavedData();
                 renderHabits();
             });
         }
 
-        // ========== CLOUD SYNC ==========
         async function saveToCloud() {
             if (!currentUser) return;
-            
             const userDoc = window.doc(window.db, 'users', currentUser.uid);
             await window.setDoc(userDoc, {
                 habits: habits,
                 lastActive: new Date().toISOString(),
                 email: currentUser.email
             }, { merge: true });
-            
-            console.log('Saved to cloud');
         }
 
         async function loadFromCloud() {
             if (!currentUser) return;
-            
             const userDoc = window.doc(window.db, 'users', currentUser.uid);
             const docSnap = await window.getDoc(userDoc);
-            
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 if (data.habits) {
                     habits = data.habits;
-                    saveData(); // Update local storage
+                    saveData();
                 }
-                console.log('Loaded from cloud');
             }
         }
 
-        // ========== HABITS ==========
         function renderHabits() {
             const grid = document.getElementById('habitGrid');
             if (!grid) return;
@@ -235,7 +372,6 @@
             renderHabits();
         };
 
-        // ========== TIMER ==========
         function updateTimerDisplay() {
             const timerEl = document.getElementById('timer');
             if (!timerEl) return;
@@ -247,7 +383,7 @@
             const circle = document.getElementById('timerCircle');
             if (circle) {
                 const progress = ((25*60 - timerSeconds) / (25*60)) * 360;
-                circle.style.background = `conic-gradient(var(--accent) ${progress}deg, var(--gray) ${progress}deg)`;
+                circle.style.background = `conic-gradient(#FF6B00 ${progress}deg, #333 ${progress}deg)`;
             }
         }
 
@@ -278,11 +414,9 @@
             updateTimerDisplay();
         });
 
-        // ========== MOTIVATION ==========
         function setDailyQuote() {
             const quoteEl = document.getElementById('quote');
             if (!quoteEl) return;
-            
             const random = Math.floor(Math.random() * quotes.length);
             quoteEl.textContent = `"${quotes[random]}"`;
         }
@@ -293,7 +427,6 @@
             if (quoteEl) {
                 quoteEl.textContent = `"${quotes[random]}"`;
             }
-            
             const btn = document.getElementById('feeling-down');
             if (btn) {
                 btn.style.transform = 'scale(0.95)';
@@ -301,7 +434,6 @@
             }
         });
 
-        // ========== MICRO-INTERACTIONS ==========
         function setupEventListeners() {
             document.querySelectorAll('.btn-primary').forEach(btn => {
                 btn.addEventListener('mousedown', () => btn.style.transform = 'scale(0.95)');
