@@ -300,6 +300,52 @@
 
         // --- PRESERVE YOUR ORIGINAL HABIT LOGIC BELOW ---
         // (I will help you move your exact JS logic here in the next step)
-    </script>
+    /* --- DEBUGGING PHOENIX SEQUENCING --- */
+const embers = document.getElementById('scene-embers');
+const rebirth = document.getElementById('scene-rebirth');
+const ganador = document.getElementById('scene-ganador');
+const splash = document.getElementById('splash-container');
+const app = document.getElementById('app-shell');
+
+console.log("🔥 Phoenix Sequence: STARTING");
+
+// Transition 1: Ember -> Rebirth (at 1500ms)
+setTimeout(() => {
+    console.log("🔥 Phoenix Sequence: Moving to Scene 2 (Rebirth)");
+    if(embers && rebirth) {
+        embers.classList.remove('visible');
+        rebirth.classList.add('visible');
+    } else {
+        console.error("❌ Error: Could not find Scene 1 or 2 IDs");
+    }
+}, 1500);
+
+// Transition 2: Rebirth -> Ganador (at 3200ms)
+setTimeout(() => {
+    console.log("🔥 Phoenix Sequence: Moving to Scene 3 (Ganador)");
+    if(rebirth && ganador) {
+        rebirth.classList.remove('visible');
+        ganador.classList.add('visible');
+    } else {
+        console.error("❌ Error: Could not find Scene 2 or 3 IDs");
+    }
+}, 3200);
+
+// Final Act: Splash -> App (at 4000ms)
+setTimeout(() => {
+    console.log("🔥 Phoenix Sequence: Entering App Shell");
+    splash.style.transition = 'opacity 0.5s ease-out';
+    splash.style.opacity = '0';
+    setTimeout(() => {
+        splash.style.display = 'none';
+        app.style.display = 'flex';
+        initAppLogic();
+    }, 500);
+}, 4000);
+
+function initAppLogic() {
+    console.log("✅ GANADOR V1.0 Shell Fully Initialized.");
+    // Firebase/Logic hooks will go here next
+}
 </body>
 </html>
